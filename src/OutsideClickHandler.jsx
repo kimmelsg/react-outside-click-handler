@@ -1,22 +1,15 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-import { forbidExtraProps } from 'airbnb-prop-types';
-import { addEventListener } from 'consolidated-events';
-import objectValues from 'object.values';
-
-const DISPLAY = {
-  BLOCK: 'block',
-  FLEX: 'flex',
-  INLINE_BLOCK: 'inline-block',
-};
+import { forbidExtraProps } from "airbnb-prop-types";
+import { addEventListener } from "consolidated-events";
 
 const propTypes = forbidExtraProps({
   children: PropTypes.node.isRequired,
   onOutsideClick: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   useCapture: PropTypes.bool,
-  display: PropTypes.oneOf(objectValues(DISPLAY)),
+  style: PropTypes.object
 });
 
 const defaultProps = {
@@ -25,7 +18,9 @@ const defaultProps = {
   // `useCapture` is set to true by default so that a `stopPropagation` in the
   // children will not prevent all outside click handlers from firing - maja
   useCapture: true,
-  display: DISPLAY.BLOCK,
+  style: {
+    display: "block"
+  }
 };
 
 export default class OutsideClickHandler extends React.Component {
@@ -64,13 +59,14 @@ export default class OutsideClickHandler extends React.Component {
   onMouseDown(e) {
     const { useCapture } = this.props;
 
-    const isDescendantOfRoot = this.childNode && this.childNode.contains(e.target);
+    const isDescendantOfRoot =
+      this.childNode && this.childNode.contains(e.target);
     if (!isDescendantOfRoot) {
       this.removeMouseUp = addEventListener(
         document,
-        'mouseup',
+        "mouseup",
         this.onMouseUp,
-        { capture: useCapture },
+        { capture: useCapture }
       );
     }
   }
@@ -81,7 +77,8 @@ export default class OutsideClickHandler extends React.Component {
   onMouseUp(e) {
     const { onOutsideClick } = this.props;
 
-    const isDescendantOfRoot = this.childNode && this.childNode.contains(e.target);
+    const isDescendantOfRoot =
+      this.childNode && this.childNode.contains(e.target);
     if (this.removeMouseUp) this.removeMouseUp();
     this.removeMouseUp = null;
 
@@ -97,9 +94,9 @@ export default class OutsideClickHandler extends React.Component {
   addMouseDownEventListener(useCapture) {
     this.removeMouseDown = addEventListener(
       document,
-      'mousedown',
+      "mousedown",
       this.onMouseDown,
-      { capture: useCapture },
+      { capture: useCapture }
     );
   }
 
@@ -109,17 +106,10 @@ export default class OutsideClickHandler extends React.Component {
   }
 
   render() {
-    const { children, display } = this.props;
+    const { children, style } = this.props;
 
     return (
-      <div
-        ref={this.setChildNodeRef}
-        style={
-          display !== DISPLAY.BLOCK && objectValues(DISPLAY).includes(display)
-            ? { display }
-            : undefined
-        }
-      >
+      <div ref={this.setChildNodeRef} style={style}>
         {children}
       </div>
     );
